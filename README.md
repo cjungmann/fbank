@@ -29,6 +29,6 @@ ability to change to the indicated state.  In other words, a
 toggle button that says "On" may be indicating that the switch
 is on, or that pressing the button will turn the switch on.
 
-[https://codepen.io/AndrewGehman/pen/yORbev](CSS-only toggle switch implementation)
+(https://codepen.io/AndrewGehman/pen/yORbev)[CSS-only toggle switch implementation]
 
-[https://www.w3schools.com/howto/howto_css_custom_checkbox.asp](w3schools example.  I'm using some of this.)
+(https://www.w3schools.com/howto/howto_css_custom_checkbox.asp)[w3schools example.  I'm using some of this.]
