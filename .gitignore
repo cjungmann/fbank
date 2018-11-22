@@ -1,0 +1,13 @@
+setup/Person.sql
+setup/TAction.sql
+setup/tables.sql
+setup/utilities.sql
+site/Person.srm
+site/TAction.srm
+site/default.xsl
+site/includes
+site/*.htm
+site/*.xml
+site/testadd
+site/testparse
+

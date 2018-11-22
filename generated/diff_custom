@@ -1,0 +1,46 @@
+#!/bin/bash
+
+root="$1"
+
+sqlfile="${root}.sql"
+srmfile="${root}.srm"
+
+# This function opens the generated and current custom files in EMACS
+# in order to reconcile difference before installing the new generated
+# file in custom.
+#
+# It protects the current custom file by unsetting the file's write
+# privileges.
+#
+# In order to protect the beginning file privileges before changing them,
+# we make a bogus file to which the permissions can be copied with the
+# chmod --reference option, and from which the permissions can be restored
+# after exiting EMACS
+check_file()
+{
+    cd ../custom
+
+    local fname="$1"
+
+    if [ -f "$fname" ]; then
+        local ref_fname="${fname}__SAVED_MODS"
+
+        touch "$ref_fname"
+        chmod --reference="$fname" "$ref_fname"
+
+        chmod a-w "$fname"
+        emacs "../generated/$fname" "$fname"
+
+        chmod --reference="$ref_fname" "$fname"
+        rm "$ref_fname"
+    else
+        echo "There is not yet '$fname' in the custom directory."
+    fi
+
+    cd ../generated
+}
+
+if [ -f "$sqlfile" -a -f "$srmfile" ]; then
+    check_file "${sqlfile}"
+    check_file "${srmfile}"
+fi

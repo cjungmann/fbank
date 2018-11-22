@@ -1,0 +1,84 @@
+$database       : FBank
+$xml-stylesheet : default.xsl
+$default-mode   : list
+
+list
+   type         : table
+   procedure    : App_TAction_List
+   title        : TAction Management
+   autoload_tag : page
+   on_line_click : ?read&id={!id}
+   button
+      type  : add
+      label : Create TAction
+      task  : ?add
+   result : 1
+      schema
+         field : id
+            readOnly : true
+            hidden   : true
+         field : date_taction
+            label : Transaction Date
+         field : note
+            label : Notes
+   result : 2
+      type : variables
+
+add
+   type         : form-new
+   schema-proc  : App_TAction_Add
+   procedure    : App_TAction_Add_Setup
+   form-action  : ?add_submit
+   title        : Add TAction
+   autoload_tag : dialog
+   schema
+      field : date_taction
+         label : Transaction Date
+      field : tlines
+         label  : Actions
+         type   : sublines
+         result : alines
+         lookup : people
+      field : person
+         join   : tlines
+         ref
+            result : people
+            index  : id
+            value  : name
+      field : dorc
+         join : tlines
+         type : two-way
+         states
+            on  : debit
+            off : credit
+            default :off
+      field : amount
+         join : tlines
+      field : tnote
+         label : Notes
+   result : 1
+      name : alines
+   result : 2
+      name : people
+   result : 3
+      type : variables
+
+
+add_submit
+   type      : form-submit
+   procedure : App_TAction_Add
+   result : 1
+      type : update
+
+read
+   type      : form-view
+   procedure : App_TAction_Read
+   result : 1
+      schema
+         field : id
+            readOnly : true
+            hidden   : true
+         field : date_taction
+            label : Transaction Date
+         field : note
+            label : Notes

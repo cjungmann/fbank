@@ -1,0 +1,102 @@
+$database       : FBank
+$xml-stylesheet : default.xsl
+$default-mode   : list
+
+list
+   type          : table
+   procedure     : App_Person_List
+   title         : Person Management
+   autoload_tag  : page
+   on_line_click : ?edit&id={!id}
+   button
+      type  : add
+      label : Create Person
+      task  : ?add
+   result : 1
+      schema
+         field : id
+            readOnly : true
+            hidden   : true
+         field : name
+            label : Name
+         field : bday
+            label : Birthday
+         field : balance
+            label : Balance
+   result : 2
+      type : variables
+
+add
+   type         : form-new
+   schema-proc  : App_Person_Add
+   form-action  : ?add_submit
+   title        : Add Person
+   autoload_tag : dialog
+   schema
+      field : name
+         label : Name
+      field : bday
+         label : Birthday
+      field : balance
+         label    : Balance
+         readOnly : true
+         hidden   : true
+
+add_submit
+   type      : form-submit
+   procedure : App_Person_Add
+   result : 1
+      type : update
+
+read
+   type      : form-view
+   procedure : App_Person_Read
+   result : 1
+      schema
+         field : id
+            readOnly : true
+            hidden   : true
+         field : name
+            label : Name
+         field : bday
+            label : Birthday
+         field : balance
+            label : Balance
+
+edit
+   type         : form-edit
+   schema-proc  : App_Person_Update
+   procedure    : App_Person_Value
+   title        : Edit Person
+   form-action  : ?edit_submit
+   autoload_tag : dialog
+   schema
+      button
+         label   : Add Transaction
+         type    : open
+         url     : TAction.srm?add&id={@id}
+      button
+         label   : Delete
+         type    : delete
+         confirm : Delete {@name}
+         task    : ?delete&id={@id}
+      field : id
+         readOnly : true
+         hidden   : true
+      field : name
+         label : Name
+      field : bday
+         label : Birthday
+      field : balance
+         label    : Balance
+         readOnly : true
+
+edit_submit
+   type      : form-submit
+   procedure : App_Person_Update
+   result
+      type : update
+
+delete
+   type      : delete
+   procedure : App_Person_Delete

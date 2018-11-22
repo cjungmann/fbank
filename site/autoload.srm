@@ -1,0 +1,11 @@
+$shared : autoload_page
+   navigation
+      target
+         label : People
+         url   : Person.srm
+      target
+         label : Transactions
+         url   : TAction.srm
+      target
+         label : Sample Transaction
+         url   : TAction.srm?add

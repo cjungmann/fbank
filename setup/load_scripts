@@ -1,0 +1,35 @@
+#!/bin/bash
+
+dbase="FBank"
+
+# -r (raw) to omit tabular ouput
+# -N (--skip-column-names)
+declare -a cmd=(
+    information_schema
+    -r
+    -N
+    -e "SELECT COUNT(*) FROM SCHEMATA WHERE SCHEMA_NAME='$dbase'"
+)
+
+
+declare -i is_installed=$( mysql "${cmd[@]}" )
+echo $is_installed
+
+if [ $is_installed -eq 0 ]; then
+    echo "Creating a new database"
+    mysql -e "CREATE DATABASE IF NOT EXISTS $dbase"
+    echo "Loading script files"
+    mysql -f "${dbase}" < /usr/local/lib/SchemaServer/install/sys_procs.sql
+fi
+
+declare -a scripts=( $( ls --hide=tables*.sql *.sql ) )
+
+mysql "$dbase" < tables.sql
+
+for script in "${scripts[@]}"; do
+    echo "Loading script file ${script}:"
+    mysql "$dbase" < "${script}"
+done
+
+
+

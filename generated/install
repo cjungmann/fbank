@@ -1,0 +1,22 @@
+#!/bin/bash
+
+root="$1"
+
+sqlfile="${root}.sql"
+srmfile="${root}.srm"
+
+copy_files()
+{
+    cd ../site
+    cp -s "../generated/${srmfile}" .
+    cd ../setup
+    cp -s "../generated/${sqlfile}" .
+}
+
+if [ -f "$sqlfile" -a -f "$srmfile" ]; then
+    copy_files
+    echo "Created symbolic links of ${root} in site and setup directories." >&2
+else
+    echo "Failed to copy files: files not found." >&2
+fi
+

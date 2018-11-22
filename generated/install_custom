@@ -1,0 +1,54 @@
+#!/bin/bash
+
+root="$1"
+
+sqlfile="${root}.sql"
+srmfile="${root}.srm"
+
+move_file()
+{
+    local fname="$1"
+    cd ../custom
+    if [ -f "${fname}" ]; then
+        echo "Deleting ${fname}"
+        rm "${fname}"
+    fi
+    echo "Moving $fname"
+    mv "../generated/${fname}" .
+    cd ../generated
+}
+
+link_file()
+{
+    local fname=$1
+    local type=$2
+
+    if [ $type = "srm" ]; then
+        cd ../site
+    elif [ $type = "sql" ]; then
+        cd ../setup
+    fi
+
+    if [ -h "$fname" ]; then
+        echo "Already linked, doing nothing."
+        return 0
+    elif [ -f "$fname" ]; then
+        echo "Target file already exists. Deleting before copying."
+        rm "$fname"
+    fi
+
+    cp -s "../custom/$fname" .
+
+    cd ../generated
+}
+
+if [ -f "$sqlfile" -a -f "$srmfile" ]; then
+    move_file "$sqlfile"
+    link_file "$sqlfile" "sql"
+    move_file "$srmfile"
+    link_file "$srmfile" "srm"
+    echo "Moved, then copied files." >&2
+else
+    echo "Failed to copy files: files not found." >&2
+fi
+
