@@ -54,7 +54,7 @@
           var t = form.previousSibling;
           while (t && t.nodeType!=1)
              t = t.previousSibling;
-          return t.name==fname ? t : null;
+          return (t && t.name==fname) ? t : null;
        }
 
        function get_source()
