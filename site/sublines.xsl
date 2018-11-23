@@ -13,34 +13,17 @@
       table.sublines tr.entry { padding:0 6px; }
       table.sublines label { padding:0; margin:0; }
       table.sublines td { border: solid 1px black; }
-      table.sublines td.n { text-align:left; }
-      table.sublines td.d { text-align:center; }
-      table.sublines td.a { text-align:right; }
-      table.sublines td.b { text-align:center; }
       
-      td.dorc       { text-align:center; }
-      td.dorc label::after { content:none; }
-      td.dorc label { border:solid 1px black; font-family:sans; background-color:#DDDDDD; }
-      td.dorc input { height:0; width:0; opacity:0; }
-      td.dorc span  { border:solid 1px black; width:1.5em; cursor:pointer; padding:0 4px; }
-      td.dorc input:focus  { border: solid 1px blue; }
-
-      td.dorc input ~ span.d { color: #999999; }
-      td.dorc input ~ span.c { color: #000000; }
-      td.dorc input:checked ~ span.d { color: #000000; }
-      td.dorc input:checked ~ span.c { color: #999999; }
-
-      label.two-way input { height:0; width:0; opacity:0; }
+      label.two-way input { height:0;width:0;padding:0;margin:0; }
+      label.two-way input:focus ~ * { border: solid 1px blue; }
       label.two-way input ~ span.on   { display:none; }
       label.two-way input ~ span.off  { display:inline; }
       label.two-way input:checked ~ span.on  { display:inline; }
       label.two-way input:checked ~ span.off { display:none; }
-      
     </xsl:text>
   </xsl:template>
 
 
-  <!-- Next two to create shadow input element: -->
   <xsl:template match="*" mode="sublines_input_text">
     <xsl:value-of select="concat(@person,'|',@amount,';')" />
   </xsl:template>
@@ -54,141 +37,72 @@
     <input type="hidden" name="{$name}" value="{$value}" />
   </xsl:template>
 
-  <!-- <xsl:template match="*" mode="sublines_person_option"> -->
-  <!--   <xsl:param name="sel" /> -->
-  <!--   <xsl:element name="option"> -->
-  <!--     <xsl:attribute name="value"><xsl:value-of select="@id" /></xsl:attribute> -->
-  <!--     <xsl:if test="$sel=@id"> -->
-  <!--       <xsl:attribute name="selected">selected</xsl:attribute> -->
-  <!--     </xsl:if> -->
-  <!--     <xsl:value-of select="@name" /> -->
-  <!--   </xsl:element> -->
-  <!-- </xsl:template> -->
 
-  <!-- <xsl:template match="*" mode="sublines_dorc"> -->
-  <!--   <xsl:choose> -->
-  <!--     <xsl:when test="@dorc=1">Take</xsl:when> -->
-  <!--     <xsl:otherwise>Give</xsl:otherwise> -->
-  <!--   </xsl:choose> -->
-  <!-- </xsl:template> -->
+  <xsl:template match="field[@type='two-way']" mode="get_label_text">
+    <xsl:param name="state" />
 
-  <!-- <xsl:template match="*" mode="sublines_line"> -->
-  <!--   <xsl:param name="lookup" /> -->
-  <!--   <xsl:variable name="id" select="@person" /> -->
-  <!--   <xsl:variable name="pline" select="$lookup/*[local-name()=../@row-name][@id=$id]" /> -->
-  <!--   <xsl:variable name="pos" select="position()" /> -->
-  <!--   <tr> -->
-  <!--     <td class="n"><xsl:value-of select="$pline/@name" /></td> -->
-  <!--     <td class="d"><xsl:apply-templates select="." mode="sublines_dorc" /></td> -->
-  <!--     <td class="a"><xsl:value-of select="@amount" /></td> -->
-  <!--     <td class="b"><button type="button" name="delete" value="{$pos}"><xsl:value-of select="$ndash"/></button></td> -->
-  <!--   </tr> -->
-  <!-- </xsl:template> -->
+    <xsl:choose>
+      <xsl:when test="$state='on' or $state='1'">
+        <xsl:choose>
+          <xsl:when test="states/@on"><xsl:value-of select="states/@on" /></xsl:when>
+          <xsl:otherwise>on</xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:choose>
+          <xsl:when test="states/@off"><xsl:value-of select="states/@off" /></xsl:when>
+          <xsl:otherwise>off</xsl:otherwise>
+        </xsl:choose>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
 
-  <!-- <xsl:template match="*[@rndx]" mode="sublines_line_entry"> -->
-  <!--   <xsl:param name="joins" /> -->
-  <!--   <xsl:param name="lookup" /> -->
-  <!--   <xsl:param name="sel" /> -->
-  <!--   <tr class="entry"> -->
-  <!--     <td class="n"> -->
-  <!--       <select name="person"> -->
-  <!--         <xsl:apply-templates select="$lookup/*" mode="sublines_person_option"> -->
-  <!--           <xsl:with-param name="sel" select="$sel" /> -->
-  <!--         </xsl:apply-templates> -->
-  <!--       </select> -->
-  <!--     </td> -->
-  <!--     <td class="dorc"> -->
-  <!--       <label> -->
-  <!--         <input type="checkbox" name="dorc" value="debit" checked="checked" /> -->
-  <!--         <span class="d">Give</span> -->
-  <!--         <span class="c">Take</span> -->
-  <!--       </label> -->
-  <!--     </td> -->
-  <!--     <td class="a"> -->
-  <!--       <input type="number" name="amount" /> -->
-  <!--     </td> -->
-  <!--     <td class="b"> -->
-  <!--       <button type="button" name="add">Add</button> -->
-  <!--     </td> -->
-  <!--   </tr> -->
-  <!-- </xsl:template> -->
+  <xsl:template name="two-way-pos">
+    <xsl:param name="attrib" select="/.." />
+    <xsl:choose>
+      <xsl:when test="$attrib">
+        <xsl:variable name="par" select="$attrib/.." />
+        <xsl:variable name="both" select="$par/@on | $par/@off" />
+        <xsl:choose>
+          <xsl:when test="count($both)=2">
+            <xsl:choose>
+              <xsl:when test="local-name($attrib)=local-name($both[1])">1</xsl:when>
+              <xsl:when test="local-name($attrib)=local-name($both[2])">2</xsl:when>
+            </xsl:choose>
+          </xsl:when>
+          <xsl:otherwise>0</xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+      <xsl:otherwise>0</xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
 
-  <!-- <xsl:template match="*" mode="sublines_table"> -->
-  <!--   <xsl:param name="lookup" /> -->
-  <!--   <xsl:param name="field" /> -->
-  <!--   <xsl:variable name="rows" select="*[local-name()=../@row-name]" /> -->
-  <!--   <xsl:variable name="joins" select="$field/../field[@join=$field/@name]" /> -->
 
-  <!--   <xsl:variable name="sel"> -->
-  <!--     <xsl:call-template name="get_var_value"> -->
-  <!--       <xsl:with-param name="name" select="'person'" /> -->
-  <!--     </xsl:call-template> -->
-  <!--   </xsl:variable> -->
-
-  <!--   <xsl:apply-templates select="." mode="sublines_shadow_input"> -->
-  <!--     <xsl:with-param name="field" select="$field" /> -->
-  <!--   </xsl:apply-templates> -->
-
-  <!--   <table class="sublines"> -->
-  <!--     <xsl:apply-templates select="$rows" mode="sublines_line"> -->
-  <!--       <xsl:with-param name="lookup" select="$lookup" /> -->
-  <!--     </xsl:apply-templates> -->
-  <!--     <xsl:apply-templates select="." mode="sublines_line_entry"> -->
-  <!--       <xsl:with-param name="joins" select="$joins" /> -->
-  <!--       <xsl:with-param name="lookup" select="$lookup" /> -->
-  <!--       <xsl:with-param name="sel" select="$sel" /> -->
-  <!--     </xsl:apply-templates> -->
-  <!--   </table> -->
-  <!-- </xsl:template> -->
-
-  <!-- <xsl:template match="field[@type='sublines']" mode="show_transaction_details"> -->
-  <!--   <xsl:variable name="rname" select="@result" /> -->
-  <!--   <xsl:variable name="result" select="/*/*[@rndx][local-name()=current()/@result]" /> -->
-  <!--   <xsl:variable name="lookup" select="/*/*[@rndx][local-name()=current()/@lookup]" /> -->
-
-  <!--   <xsl:apply-templates select="$result" mode="sublines_table"> -->
-  <!--     <xsl:with-param name="lookup" select="$lookup" /> -->
-  <!--     <xsl:with-param name="field" select="." /> -->
-  <!--   </xsl:apply-templates> -->
-  <!-- </xsl:template> -->
-
-  <!-- <xsl:template match="field[@type='sublines']" mode="construct_input_old"> -->
-  <!--   <xsl:param name="data" /> -->
-  <!--   <input type="hidden" name="{@name}" data-sfw-shadow="true" /> -->
-  <!--   <form data-sfw-class="sublines" -->
-  <!--        data-sfw-input="true" -->
-  <!--        name="{@name}" -->
-  <!--        tabindex="0"> -->
-
-  <!--     <xsl:apply-templates select="." mode="show_transaction_details" /> -->
-
-  <!--   </form> -->
-  <!-- </xsl:template> -->
-
-  <!-- <xsl:template match="field[@type='sublines'][@result][@action='replotting']"> -->
-  <!--   <xsl:apply-templates select="." mode="show_transaction_details" /> -->
-  <!-- </xsl:template> -->
-
-  <xsl:template match="field[@type='two-way']/states" mode="make_display_span">
+  <xsl:template match="field[@type='two-way']" mode="make_display_span">
     <xsl:param name="state" />
     <xsl:param name="position" />
 
     <xsl:variable name="label_on">
-      <xsl:choose>
-        <xsl:when test="@on"><xsl:value-of select="@on" /></xsl:when>
-        <xsl:otherwise>on</xsl:otherwise>
-      </xsl:choose>
+      <xsl:apply-templates select="." mode="get_label_text">
+        <xsl:with-param name="state" select="1" />
+      </xsl:apply-templates>
     </xsl:variable>
 
     <xsl:variable name="label_off">
-      <xsl:choose>
-        <xsl:when test="@off"><xsl:value-of select="@off" /></xsl:when>
-        <xsl:otherwise>off</xsl:otherwise>
-      </xsl:choose>
+      <xsl:apply-templates select="." mode="get_label_text" />
     </xsl:variable>
 
-    <xsl:variable name="pos_on" select="count(@on/preceding-sibling::*)" />
-    <xsl:variable name="pos_off" select="count(@off/preceding-sibling::*)" />
+    <xsl:variable name="pos_on">
+      <xsl:call-template name="two-way-pos">
+        <xsl:with-param name="attrib" select="states/@on" />
+      </xsl:call-template>
+    </xsl:variable>
+
+    <xsl:variable name="pos_off">
+      <xsl:call-template name="two-way-pos">
+        <xsl:with-param name="attrib" select="states/@off" />
+      </xsl:call-template>
+    </xsl:variable>
 
     <xsl:variable name="label_left">
       <xsl:choose>
@@ -261,7 +175,7 @@
       </xsl:choose>
     </xsl:variable>
 
-    <label class="two-way" for="{@name}">
+    <label class="two-way" onselectstart="return false">
       <xsl:element name="input">
         <xsl:attribute name="type">checkbox</xsl:attribute>
         <xsl:attribute name="name"><xsl:value-of select="@name" /></xsl:attribute>
@@ -269,11 +183,11 @@
           <xsl:attribute name="checked">checked</xsl:attribute>
         </xsl:if>
       </xsl:element>
-      <xsl:apply-templates select="states" mode="make_display_span">
+      <xsl:apply-templates select="." mode="make_display_span">
         <xsl:with-param name="position" select="0" />
         <xsl:with-param name="state" select="$state" />
       </xsl:apply-templates>
-      <xsl:apply-templates select="states" mode="make_display_span">
+      <xsl:apply-templates select="." mode="make_display_span">
         <xsl:with-param name="position" select="1" />
         <xsl:with-param name="state" select="$state" />
       </xsl:apply-templates>
@@ -282,8 +196,20 @@
 
   <xsl:template match="field[@type='two-way']" mode="get_value">
     <xsl:param name="data" />
+
+    <xsl:variable name="val">
+      <xsl:if test="$data">
+        <xsl:value-of select="$data/@*[local-name()=current()/@name]" />
+      </xsl:if>
+    </xsl:variable>
+
+    <xsl:apply-templates select="." mode="get_label_text">
+      <xsl:with-param name="state" select="$val" />
+    </xsl:apply-templates>
     
   </xsl:template>
+
+  <xsl:template match="field[@type='two-way']" mode="def_css_class">def_center</xsl:template>
 
   <!-- New templates for more generic construction -->
   <xsl:template match="field[@join]" mode="sublines_entry_fields">
