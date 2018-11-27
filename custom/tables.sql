@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS TLine
 (
    id_taction   INT UNSIGNED NOT NULL,
    id_person    INT UNSIGNED NOT NULL,
+   dorc         BOOLEAN,
    amount       DECIMAL(5,2),
 
    INDEX(id_taction),
@@ -28,21 +29,3 @@ CREATE TABLE IF NOT EXISTS TLine
 );
 
 
--- Two tables to stage pending transactions until complete
--- Pending transaction table
-CREATE TABLE IF NOT EXISTS PAction
-(
-   id      INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-   started DATETIME,
-   note    VARCHAR(128)
-);
-
--- Pending transaction line table
-CREATE TABLE IF NOT EXISTS PLine
-(
-   id_paction INT UNSIGNED NOT NULL,
-   id_person  INT UNSIGNED NOT NULL,
-   amount     DECIMAL(5,2),
-
-   INDEX(id_paction)
-);
