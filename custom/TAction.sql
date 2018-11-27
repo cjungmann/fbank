@@ -9,8 +9,9 @@ BEGIN
 
    CREATE TEMPORARY TABLE TLines_Temp
    (
-      id_person INT UNSIGNED,
-      amount DECIMAL(5,2)
+      t_person INT UNSIGNED,
+      t_dorc BOOLEAN,
+      t_amount DECIMAL(5,2)
     );
 
 END $$
@@ -28,17 +29,11 @@ CREATE PROCEDURE App_TAction_Add_To_TLines_Temp(person INT UNSIGNED,
                                                 dorc INT UNSIGNED,
                                                 amount DECIMAL(5,2))
 BEGIN
-   DECLARE tamount DECIMAL(5,2);
-   IF dorc=1 THEN
-      SET tamount = amount;
-   ELSE
-      SET tamount = -amount;
-   END IF;
-
-   IF amount IS NOT NULL AND NOT (amount=0) THEN
+   -- IF amount IS NOT NULL AND NOT (amount=0) THEN
+   IF amount <> 0 THEN
       INSERT INTO TLines_Temp
-      (id_person, amount)
-      VALUES(person, tamount);
+      (t_person, t_dorc, t_amount)
+      VALUES(person, dorc, amount);
    END IF;
 END $$
 
@@ -55,6 +50,7 @@ BEGIN
    DECLARE NDX_FIELD  INT UNSIGNED;
 
    DECLARE PERSON_ID INT UNSIGNED;
+   DECLARE DORC      BOOLEAN;
    DECLARE AMOUNT    DECIMAL(5,2);
 
    SELECT ';', '|' INTO TOK_LINE, TOK_FIELD;
@@ -67,6 +63,7 @@ BEGIN
 
       SET NDX_FIELD = 0;
       SET PERSON_ID = NULL;
+      SET DORC = 0;
       SET AMOUNT = NULL;
 
       WHILE LENGTH(REM_FIELDS) > 0 DO
@@ -75,7 +72,8 @@ BEGIN
 
          CASE NDX_FIELD
             WHEN 0 THEN SET PERSON_ID = CUR_FIELD;
-            WHEN 1 THEN SET AMOUNT = CUR_FIELD;
+            WHEN 1 THEN SET DORC = CUR_FIELD;
+            WHEN 2 THEN SET AMOUNT = CUR_FIELD;
          END CASE;
 
          SET NDX_FIELD = NDX_FIELD + 1;
@@ -84,12 +82,49 @@ BEGIN
 
       IF PERSON_ID IS NOT NULL AND AMOUNT IS NOT NULL THEN
          INSERT INTO TLines_Temp
-            (id_person, amount)
-            VALUES(PERSON_ID, AMOUNT);
+            (t_person, t_dorc, t_amount)
+            VALUES(PERSON_ID, DORC, AMOUNT);
       END IF;
 
    END WHILE;
 
+END $$
+
+-- ---------------------------------------------------------------------
+DROP PROCEDURE IF EXISTS App_TAction_Update_Balances_From_TLines_Temp $$
+CREATE PROCEDURE App_TAction_Update_Balances_From_TLines_Temp()
+BEGIN
+   DROP TABLE IF EXISTS pdiff;
+
+   -- Create and populate summed debits/credits table:
+   CREATE TEMPORARY TABLE pdiff
+   (
+      p_person INT UNSIGNED,
+      p_debits DECIMAL(5,2) DEFAULT 0,
+      p_credits DECIMAL(5,2) DEFAULT 0
+   );
+
+   INSERT INTO pdiff
+          (p_person, p_debits, p_credits)
+          SELECT t_person,
+                 SUM(CASE WHEN NOT(t_dorc)
+                          THEN t_amount
+                          ELSE 0
+                      END),
+                 SUM(CASE WHEN t_dorc
+                          THEN t_amount
+                          ELSE 0
+                       END)
+            FROM TLines_Temp
+           GROUP BY t_person;
+
+   -- Update with summed debits/credits table
+   UPDATE Person p
+      INNER JOIN pdiff d ON p.id = d.p_person
+      SET p.balance = p.balance + d.p_debits - d.p_credits;
+
+   DROP TABLE pdiff;
+      
 END $$
 
 -- ------------------------------------------------
@@ -146,8 +181,8 @@ BEGIN
 
    -- Create a temp table with submitted transaction lines:
    CALL App_TAction_Prepare_TLines_Temp();
-   CALL App_TAction_Add_To_TLines_Temp(person,dorc,amount);
    CALL App_TAction_Parse_To_TLines_Temp(tlines);
+   CALL App_TAction_Add_To_TLines_Temp(person,dorc,amount);
 
    SELECT COUNT(*) INTO rcount
      FROM TLines_Temp;
@@ -155,7 +190,7 @@ BEGIN
    -- Only create a transaction record if there are transaction lines:
    IF rcount > 0 THEN
       INSERT INTO TAction
-             (date_taction, 
+             (date_taction,
               note)
       VALUES (NOW(), 
               tnote);
@@ -166,12 +201,15 @@ BEGIN
          SET newid = LAST_INSERT_ID();
 
          INSERT INTO
-            TLine (id_taction, id_person, amount)
-            SELECT newid, id_person, amount
+            TLine (id_taction, id_person, dorc, amount)
+            SELECT newid, t_person, t_dorc, t_amount
               FROM TLines_Temp;
+
+         CALL App_TAction_Update_Balances_From_TLines_Temp();
 
          -- for update result:
          CALL App_TAction_List(newid);
+
       END IF;
    END IF;
 
