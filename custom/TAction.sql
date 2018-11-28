@@ -10,7 +10,7 @@ BEGIN
    CREATE TEMPORARY TABLE TLines_Temp
    (
       t_person INT UNSIGNED,
-      t_dorc BOOLEAN,
+      t_dorc BOOLEAN NOT NULL DEFAULT 0,
       t_amount DECIMAL(5,2)
     );
 
@@ -33,7 +33,7 @@ BEGIN
    IF amount <> 0 THEN
       INSERT INTO TLines_Temp
       (t_person, t_dorc, t_amount)
-      VALUES(person, dorc, amount);
+      VALUES(person, COALESCE(dorc,0), amount);
    END IF;
 END $$
 
