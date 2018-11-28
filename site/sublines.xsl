@@ -10,31 +10,44 @@
 
   <xsl:template name="sublines_css_styles">
     <xsl:text>
-      table.sublines tr.entry { padding:0 6px; }
-      table.sublines label { padding:0; margin:0; }
-      table.sublines td { border: solid 1px black; }
+      div.sublines tr.entry { padding:0 6px; }
+      div.sublines label { padding:0; margin:0; }
+      div.sublines td { border: solid 1px black; }
       
-      label.two-way input { height:0;width:0;padding:0;margin:0; }
+      label.two-way input { height:0;width:0;position:fixed; }
       label.two-way input:focus ~ * { border: solid 1px blue; }
       label.two-way input ~ span.on   { display:none; }
       label.two-way input ~ span.off  { display:inline; }
       label.two-way input:checked ~ span.on  { display:inline; }
       label.two-way input:checked ~ span.off { display:none; }
+      label.two-way span span    { color:#CCCCCC; font-weight:bold; }
+      label.two-way span.picked_label { color: #3366FF; }
     </xsl:text>
   </xsl:template>
 
 
-  <xsl:template match="*" mode="sublines_input_text">
-    <xsl:value-of select="concat(@person,'|',@amount,';')" />
+  <xsl:template match="@*" mode="sublines_input_text">
+    <xsl:value-of select="." />
+    <xsl:choose>
+      <xsl:when test="position()=last()">;</xsl:when>
+      <xsl:otherwise>|</xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
-  <xsl:template match="*" mode="sublines_shadow_input">
+  <xsl:template match="*" mode="sublines_input_text">
+    <xsl:apply-templates select="@*" mode="sublines_input_text" />
+  </xsl:template>
+
+  <xsl:template match="*" mode="sublines_saved_input">
     <xsl:param name="field" />
-    <xsl:variable name="name" select="concat('shadow_',$field/@name)" />
+
+    <xsl:variable name="name" select="$field/@name" />
+
     <xsl:variable name="value">
       <xsl:apply-templates select="*[local-name()=../@row-name]" mode="sublines_input_text" />
     </xsl:variable>
-    <input type="hidden" name="{$name}" value="{$value}" />
+
+    <input type="hidden" name="{$name}" value="{$value}" data-xml-skip="true" />
   </xsl:template>
 
 
@@ -77,10 +90,10 @@
     </xsl:choose>
   </xsl:template>
 
-
-  <xsl:template match="field[@type='two-way']" mode="make_display_span">
-    <xsl:param name="state" />
-    <xsl:param name="position" />
+  <xsl:template match="field[@type='two-way']" mode="make_label_span">
+    <xsl:param name="state" />    <!-- on or off -->
+    <xsl:param name="position" /> <!-- 0 for left/top or 1 for right/bottom -->
+    <xsl:param name="side" />     <!-- 0 for left/top or 1 for right/bottom -->
 
     <xsl:variable name="label_on">
       <xsl:apply-templates select="." mode="get_label_text">
@@ -104,26 +117,61 @@
       </xsl:call-template>
     </xsl:variable>
 
-    <xsl:variable name="label_left">
+    <xsl:element name="span">
+      <xsl:if test="$position = $side">
+        <xsl:attribute name="class">picked_label</xsl:attribute>
+      </xsl:if>
       <xsl:choose>
-        <xsl:when test="$pos_on &lt; $pos_off">
-          <xsl:value-of select="$label_on" />
+        <xsl:when test="$pos_off &gt; $pos_on">
+          <xsl:choose>
+            <xsl:when test="$side='0'">
+              <xsl:value-of select="$label_on" />
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="$label_off" />
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="$label_off" />
+          <xsl:choose>
+            <xsl:when test="$side='0'">
+              <xsl:value-of select="$label_off" />
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="$label_on" />
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:otherwise>
       </xsl:choose>
+    </xsl:element>
+
+  </xsl:template>
+
+
+  <xsl:template match="field[@type='two-way']" mode="make_display_span">
+    <xsl:param name="state" />     <!-- on or off -->
+    <xsl:param name="position" />  <!-- left/top or right/botton -->
+
+    <xsl:variable name="label_on">
+      <xsl:apply-templates select="." mode="get_label_text">
+        <xsl:with-param name="state" select="1" />
+      </xsl:apply-templates>
     </xsl:variable>
 
-    <xsl:variable name="label_right">
-      <xsl:choose>
-        <xsl:when test="$pos_on &lt; $pos_off">
-          <xsl:value-of select="$label_off" />
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:value-of select="$label_on" />
-        </xsl:otherwise>
-      </xsl:choose>
+    <xsl:variable name="label_off">
+      <xsl:apply-templates select="." mode="get_label_text" />
+    </xsl:variable>
+
+    <xsl:variable name="pos_on">
+      <xsl:call-template name="two-way-pos">
+        <xsl:with-param name="attrib" select="states/@on" />
+      </xsl:call-template>
+    </xsl:variable>
+
+    <xsl:variable name="pos_off">
+      <xsl:call-template name="two-way-pos">
+        <xsl:with-param name="attrib" select="states/@off" />
+      </xsl:call-template>
     </xsl:variable>
 
     <xsl:variable name="arrow">
@@ -143,18 +191,28 @@
       </xsl:choose>
     </xsl:variable>
 
-    <xsl:element name="span">
-      <xsl:attribute name="class">
-        <xsl:choose>
-          <xsl:when test="$position=0">off</xsl:when>
-          <xsl:when test="$position=1">on</xsl:when>
-        </xsl:choose>
-      </xsl:attribute>
-      <xsl:value-of select="$label_left" />
-      <xsl:value-of select="$arrow" />
-      <xsl:value-of select="$label_right" />
-    </xsl:element>
+    <xsl:variable name="class">
+      <xsl:choose>
+        <xsl:when test="$position=0">off</xsl:when>
+        <xsl:when test="$position=1">on</xsl:when>
+      </xsl:choose>
+    </xsl:variable>
 
+    <span class="{$class}">
+      <xsl:apply-templates select="." mode="make_label_span">
+        <xsl:with-param name="state" select="$state" />
+        <xsl:with-param name="position" select="$position" />
+        <xsl:with-param name="side" select="0" />
+      </xsl:apply-templates>
+
+      <xsl:value-of select="$arrow" />
+
+      <xsl:apply-templates select="." mode="make_label_span">
+        <xsl:with-param name="state" select="$state" />
+        <xsl:with-param name="position" select="$position" />
+        <xsl:with-param name="side" select="1" />
+      </xsl:apply-templates>
+    </span>
   </xsl:template>
 
   <xsl:template match="field[@type='two-way']" mode="construct_input">
@@ -271,8 +329,13 @@
 
   <xsl:template match="field[@type='sublines']" mode="build_lines">
     <xsl:variable name="joins" select="../field[@join=current()/@name]" />
+    <xsl:variable name="result" select="/*/*[@rndx][local-name()=current()/@result]" />
 
-    <table class="sublines" data-sfw-class="sublines" data-sfw-input="true" name="{@name}">
+    <xsl:apply-templates select="$result" mode="sublines_saved_input">
+      <xsl:with-param name="field" select="." />
+    </xsl:apply-templates>
+    
+    <table>
       <xsl:apply-templates select="." mode="sublines_extra_rows">
         <xsl:with-param name="joins" select="$joins" />
       </xsl:apply-templates>
@@ -285,8 +348,10 @@
   <xsl:template match="field[@type='sublines'][@result]" mode="construct_input">
     <xsl:param name="data" />
 
-    <input type="hidden" name="{@name}" data-sfw-shadow="true" />
-    <xsl:apply-templates select="." mode="build_lines" />
+    <!-- <input type="hidden" name="{@name}" data-sfw-shadow="true" /> -->
+    <div class="sublines" data-sfw-class="sublines" data-sfw-input="true" name="{@name}">
+      <xsl:apply-templates select="." mode="build_lines" />
+    </div>
 
   </xsl:template>
 
