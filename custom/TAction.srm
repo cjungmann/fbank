@@ -41,19 +41,21 @@ add
          lookup : people
       field : person
          join   : tlines
+         value  : {$person}
          ref
             result : people
             index  : id
-            value  : name
+            label  : name
       field : dorc
          join : tlines
          type : two-way
          states
-            on  : debit
-            off : credit
+            off : Give  # debit
+            on  : Take  # credit
             default :off
       field : amount
          join : tlines
+         custom_class : amount_input
       field : tnote
          label : Notes
    result : 1
