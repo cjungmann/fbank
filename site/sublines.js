@@ -38,38 +38,6 @@
        return null;
     };
 
-    /**
-     * The element just before the widget is the element for the HTTP-submitted form.
-     * The first child input element of the widget is the shadow input that is updated
-     * when the transaction line is submitted.  This function copies the shadow input
-     * value to the HTTP-submitted form input element.
-     */
-    _sublines.prototype.update_input_from_shadow = function()
-    {
-       var form = this.widget();
-       var fname = form.getAttribute("name");
-
-       function get_target()
-       {
-          var t = form.previousSibling;
-          while (t && t.nodeType!=1)
-             t = t.previousSibling;
-          return (t && t.name==fname) ? t : null;
-       }
-
-       function get_source()
-       {
-          var s = form.firstChild;
-          while (s && s.nodeType!=1)
-             s = s.nextSibling;
-          return s.name == "shadow_"+fname ? s : null;
-       }
-
-       var target, source;
-       if ((target=get_target()) && (source=get_source()))
-          target.value = source.value;
-    };
-
     _sublines.prototype.replot = function()
     {
        var target = this.widget();
@@ -81,10 +49,8 @@
        if (field)
        {
           field.setAttribute("action", "replotting");
-          SFW.xslobj.transformReplace(target, field);
+          SFW.xslobj.transformFill(target, field);
           field.removeAttribute("action");
-
-          this.update_input_from_shadow();
        }
     };
 
