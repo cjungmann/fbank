@@ -1,0 +1,47 @@
+#!/bin/bash
+
+targetname="fbanktest"
+targetdbase="FBank"
+
+sitedir=${PWD}/site
+targetfile="/etc/apache2/sites-available/${targetname}.conf"
+
+
+_make_conf_string()
+{
+    echo "# FBANK default
+<VirtualHost *:80>
+   ServerName fbank
+   DocumentRoot ${sitedir}
+   DirectoryIndex Person.srm
+</VirtualHost>"
+}
+
+
+install_conf()
+{
+    confstr=$(_make_conf_string)
+    echo "${confstr}" > "${targetfile}"
+    a2ensite "${targetname}"
+}
+
+uninstall_conf()
+{
+    a2dissite "${targetname}"
+    rm "${targetfile}"
+}
+
+install_database()
+{
+    mysql -e "CREATE DATABASE ${targetdbase}"
+    cd ../setup
+    ./load_scripts
+    cd -
+}
+
+
+install()
+{
+    install_database
+    install_conf
+}
