@@ -131,7 +131,7 @@ END $$
 DROP PROCEDURE IF EXISTS App_TAction_Get_Lines $$
 CREATE PROCEDURE App_TAction_Get_Lines(taction_id INT UNSIGNED)
 BEGIN
-   SELECT p.id, p.name, l.amount
+   SELECT p.id, p.name, l.dorc, l.amount
      FROM TLine l
           INNER JOIN Person p ON p.id = l.id_person
     WHERE l.id_taction = taction_id;
