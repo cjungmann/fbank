@@ -13,8 +13,11 @@
   in sfw_debug.xsl.
   -->
   <xsl:import href="includes/sfw_debug.xsl" />
-  <xsl:import href="sublines.xsl" />
   <!-- <xsl:import href="includes/sfw_compiled.xsl" /> -->
+
+  <!-- custom application stylesheets: -->
+  <xsl:import href="sublines.xsl" />
+  <xsl:import href="taction.xsl" />
   
   <xsl:output
       method="xml"
