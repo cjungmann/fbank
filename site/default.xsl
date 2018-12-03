@@ -38,6 +38,7 @@
         <script type="text/javascript" src="sublines.js" />
         <script type="text/javascript" src="amount_input.js" />
         <style type="text/css">
+          body { font-size:16pt; }
           <xsl:call-template name="sublines_css_styles" />
         </style>
       </head>
