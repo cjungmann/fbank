@@ -38,9 +38,8 @@ add
       field : bday
          label : Birthday
       field : balance
-         label    : Balance
-         readOnly : true
-         hidden   : true
+         label    : Starting Balance
+         value    : 0.00
 
 add_submit
    type      : form-submit
