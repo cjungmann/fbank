@@ -19,9 +19,19 @@
       <td><xsl:value-of select="." /></td>
     </xsl:template>
 
+    <xsl:template match="@dorc" mode="tdetail_table_cell">
+      <td>
+        <xsl:choose>
+          <xsl:when test=".='1'">Take</xsl:when>
+          <xsl:when test=".='0'">Give</xsl:when>
+          <xsl:otherwise>?</xsl:otherwise>
+        </xsl:choose>
+      </td>
+    </xsl:template>
+
     <xsl:template match="*" mode="tdetail_table_row">
       <tr>
-        <xsl:apply-templates select="@*" mode="tdetail_table_cell" />
+        <xsl:apply-templates select="@*[local-name()!='id']" mode="tdetail_table_cell" />
       </tr>
     </xsl:template>
 
