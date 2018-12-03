@@ -5,7 +5,6 @@ setup/utilities.sql
 site/Person.srm
 site/TAction.srm
 site/includes
-site/*.htm
 site/*.xml
 site/testadd
 site/testparse
