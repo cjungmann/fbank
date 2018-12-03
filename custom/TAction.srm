@@ -82,5 +82,14 @@ read
             hidden   : true
          field : date_taction
             label : Transaction Date
+         field : detail
+            label : Detail
+            type  : TDetail
+            result : lines
          field : note
             label : Notes
+   result : 2
+      name : lines
+      schema
+   result : 3
+      name : people

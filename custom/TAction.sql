@@ -223,6 +223,7 @@ CREATE PROCEDURE App_TAction_Read(id INT UNSIGNED)
 BEGIN
    SELECT t.id,
           t.date_taction,
+          NULL AS detail,
           t.note
      FROM TAction t
     WHERE (id IS NULL OR t.id = id);
