@@ -28,13 +28,18 @@
       omit-xml-declaration="yes"
       encoding="utf-8"/>
 
+  <!-- <xsl:variable name="jscripts">debug</xsl:variable> -->
+
   <xsl:template match="/">
     <html>
       <head>
         <title>Family Bank</title>
 
         <!-- SchemaFW includes -->
-        <xsl:apply-templates select="." mode="fill_head" />
+        <xsl:apply-templates select="." mode="fill_head">
+          <xsl:with-param name="jscripts">min</xsl:with-param>
+        </xsl:apply-templates>
+
         <script type="text/javascript" src="sublines.js" />
         <script type="text/javascript" src="amount_input.js" />
         <style type="text/css">
