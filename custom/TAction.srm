@@ -18,9 +18,9 @@ list
             readOnly : true
             hidden   : true
          field : date_taction
-            label : Transaction Date
+            label : Date
          field : note
-            label : Notes
+            label : Note
    result : 2
       type : variables
 
@@ -33,7 +33,7 @@ add
    autoload_tag : dialog
    schema
       field : date_taction
-         label : Transaction Date
+         label : Date
       field : tlines
          label  : Actions
          type   : sublines
