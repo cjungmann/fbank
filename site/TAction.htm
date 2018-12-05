@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <title>Schema Framework Application</title>
+    <link rel="stylesheet" type="text/css" href="includes/schemafw.css" />
+    <script type="text/javascript" src="includes/XML.js"></script>
+    <script type="text/javascript" src="includes/sfw_doc.js"></script>
+    <script type="text/javascript" src="includes/xdoc.js"></script>
+    <script type="text/javascript">
+      var fake_SFW = {};
+
+      function its_working()
+      {
+         window.onload();
+      }
+      window.onload = function()
+      {
+         initialize_new_page.func = "its_working";
+         run_xdoc_loader("TAction.srm");
+      }
+    //]]</script>
+  </head>
+  <body>
+    <h1 style="font-size:200%; margin-top:2em;">Schema Framework Application</h1>
+    <p style="text-align:center; font-size:120%;">Loading application data.  We will be with you shortly.</p>
+  </body>
+</html>

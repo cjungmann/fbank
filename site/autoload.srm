@@ -2,10 +2,7 @@ $shared : autoload_page
    navigation
       target
          label : People
-         url   : Person.srm
+         url   : Person.htm
       target
          label : Transactions
-         url   : TAction.srm
-      target
-         label : Sample Transaction
-         url   : TAction.srm?add
+         url   : TAction.htm
