@@ -1,3 +1,5 @@
+USE FBank;
+
 DELIMITER $$
 
 -- ---------------------------------------------
@@ -21,30 +23,72 @@ END $$
 
 -- ----------------------------------------------
 DROP FUNCTION IF EXISTS App_Get_Allowance_Date $$
-CREATE FUNCTION App_Get_Allowance_Date()
-   RETURNS DATE
-BEGIN
-   DECLARE tday DATE;
-   DECLARE dindex INT;
-   SELECT NOW(), WEEKDAY(tday) INTO tday, dindex;
+-- CREATE FUNCTION App_Get_Allowance_Date()
+--    RETURNS DATE
+-- BEGIN
+--    DECLARE tday DATE;
+--    DECLARE dindex INT;
+--    SELECT NOW(), WEEKDAY(tday) INTO tday, dindex;
    
-   IF dindex > 0 THEN
-      RETURN tday + INTERVAL 6-dindex DAY;
+--    IF dindex > 0 THEN
+--       RETURN tday + INTERVAL 6-dindex DAY;
+--    ELSE
+--       RETURN tday;
+--    END IF;
+-- END $$
+
+-- --------------------------------------------
+DROP FUNCTION IF EXISTS App_Get_Allowance_Amount $$
+CREATE FUNCTION App_Get_Allowance_Amount(edate DATETIME, bday DATE)
+   RETURNS DECIMAL(5,2)
+BEGIN
+   DECLARE years_old INTEGER DEFAULT App_Get_Years_Elapsed(bday, edate);
+
+   IF years_old > 3 AND years_old < 21 THEN
+      RETURN years_old - 3;
    ELSE
-      RETURN tday;
+      RETURN 0;
    END IF;
 END $$
 
--- --------------------------------------------
-DROP FUNCTION IF EXISTS Get_Allowance_Amount $$
-CREATE FUNCTION Get_Allowance_Amount(bday DATE)
-   RETURNS DECIMAL(5,2)
+-- -----------------------------------------
+DROP PROCEDURE IF EXISTS App_Distribute_Allowances $$
+CREATE PROCEDURE App_Distribute_Allowances(edate DATETIME)
 BEGIN
-   DECLARE sunday DATE DEFAULT App_Get_Allowance_Date();
-   DECLARE years_old INTEGER DEFAULT App_Get_Years_Elapsed(bday, sunday);
+   DECLARE rcount INT UNSIGNED;
+   DECLARE newid INT UNSIGNED;
 
-   RETURN years_old - 3;
+   INSERT INTO TAction
+          (date_taction, trans_type, note)
+   VALUES (edate, 'allowance', 'Allowance');
+
+   IF ROW_COUNT() > 0 THEN
+      SET newid = LAST_INSERT_ID();
+
+      INSERT INTO TLine
+             (id_taction, id_person, dorc, amount)
+             SELECT t.*
+               -- using sub-select to avoid twice calling App_Get_Allowance_Amount:
+               FROM (SELECT newid, p.id, 0, App_Get_Allowance_Amount(edate, p.bday) AS amt
+                     FROM Person p) t
+             WHERE t.amt > 0;
+   END IF;
 END $$
+
+-- -----------------------------------------
+DROP PROCEDURE IF EXISTS App_Grant_Allowances $$
+CREATE PROCEDURE App_Grant_Allowances()
+BEGIN
+   CALL App_Distribute_Allowances(NOW());
+END $$
+
+-- ----------------------------------
+-- DROP EVENT IF EXISTS grant_allowances
+-- CREATE EVENT grant_allowances
+--    ON SCHEDULE
+--       EVERY 1 WEEK
+--          STARTS CURRENT_DATE + INTERVAL 6 - WEEKDAY(CURRENT_DATE) DAY
+--    DO CALL App_Grant_Allowances()  $$
 
 
 DELIMITER ;
