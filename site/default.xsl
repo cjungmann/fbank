@@ -12,8 +12,8 @@
   after running make update-client to compile the import references
   in sfw_debug.xsl.
   -->
-  <xsl:import href="includes/sfw_debug.xsl" />
-  <!-- <xsl:import href="includes/sfw_compiled.xsl" /> -->
+  <!-- <xsl:import href="includes/sfw_debug.xsl" /> -->
+  <xsl:import href="includes/sfw_compiled.xsl" />
 
   <!-- custom application stylesheets: -->
   <xsl:import href="sublines.xsl" />
@@ -27,8 +27,6 @@
       indent="yes"
       omit-xml-declaration="yes"
       encoding="utf-8"/>
-
-  <!-- <xsl:variable name="jscripts">debug</xsl:variable> -->
 
   <xsl:template match="/">
     <html>
