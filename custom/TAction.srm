@@ -56,6 +56,9 @@ add
       field : amount
          join : tlines
          custom_class : amount_input
+      field : ttype
+         label : Transaction Type
+         enum : TAction:trans_type
       field : tnote
          label : Notes
    result : 1
