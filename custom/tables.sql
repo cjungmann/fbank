@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS TAction
 (
    id           INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
    date_taction DATETIME,
+   trans_type   ENUM('generic','allowance','fine','transfer'),
    note         VARCHAR(128)
 );
 
@@ -21,7 +22,7 @@ CREATE TABLE IF NOT EXISTS TLine
 (
    id_taction   INT UNSIGNED NOT NULL,
    id_person    INT UNSIGNED NOT NULL,
-   dorc         BOOLEAN,
+   dorc         BOOLEAN,   -- Debit=0 Credit=1
    amount       DECIMAL(5,2),
 
    INDEX(id_taction),

@@ -174,6 +174,7 @@ CREATE PROCEDURE App_TAction_Add(tlines TEXT,
                                  person INT UNSIGNED,
                                  dorc INT UNSIGNED,
                                  amount DECIMAL(5,2),
+                                 ttype VARCHAR(18),
                                  tnote TEXT)
 BEGIN
    DECLARE newid INT UNSIGNED;
@@ -191,8 +192,10 @@ BEGIN
    IF rcount > 0 THEN
       INSERT INTO TAction
              (date_taction,
+             trans_type,
               note)
-      VALUES (NOW(), 
+      VALUES (NOW(),
+              ttype,
               tnote);
 
       -- Reuse rcount variable now that it served its gatekeeper role:
@@ -223,8 +226,9 @@ CREATE PROCEDURE App_TAction_Read(id INT UNSIGNED)
 BEGIN
    SELECT t.id,
           t.date_taction,
-          NULL AS detail,
-          t.note
+          t.note,
+          t.trans_type,
+          NULL AS detail
      FROM TAction t
     WHERE (id IS NULL OR t.id = id);
 
