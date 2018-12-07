@@ -37,6 +37,26 @@ BEGIN
    END IF;
 END $$
 
+-- ----------------------------------------------
+DROP PROCEDURE IF EXISTS App_Reconcile_Balances $$
+CREATE PROCEDURE App_Reconcile_Balances()
+BEGIN
+   UPDATE Person p
+          INNER JOIN (
+             SELECT id_person,
+                    SUM(CASE WHEN NOT(dorc)
+                             THEN amount
+                             ELSE 0
+                         END) AS debit,
+                    SUM(CASE WHEN dorc
+                             THEN amount
+                             ELSE 0
+                         END) AS credit
+               FROM TLine
+               GROUP BY id_person) s ON s.id_person = p.id
+      SET balance = s.debit - s.credit;
+END $$
+
 -- -----------------------------------------------------
 DROP PROCEDURE IF EXISTS App_TAction_Parse_To_TLines_Temp $$
 CREATE PROCEDURE App_TAction_Parse_To_TLines_Temp(linestxt TEXT)
