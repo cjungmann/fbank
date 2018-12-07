@@ -65,13 +65,26 @@ BEGIN
    IF ROW_COUNT() > 0 THEN
       SET newid = LAST_INSERT_ID();
 
-      INSERT INTO TLine
-             (id_taction, id_person, dorc, amount)
+      CALL App_TAction_Prepare_TLines_Temp();
+
+      -- Make table of allowances
+      INSERT INTO TLines_Temp
+             (t_person, t_dorc, t_amount)
              SELECT t.*
-               -- using sub-select to avoid twice calling App_Get_Allowance_Amount:
-               FROM (SELECT newid, p.id, 0, App_Get_Allowance_Amount(edate, p.bday) AS amt
+             FROM (SELECT p.id,
+                          0,
+                          App_Get_Allowance_Amount(edate, p.bday) AS amt
                      FROM Person p) t
              WHERE t.amt > 0;
+
+      -- Update balances, then add lines to transaction details:
+      CALL App_TAction_Update_Balances_From_TLines_Temp();
+      INSERT INTO TLine
+             (id_taction, id_person, dorc, amount)
+             SELECT newid, t_person, t_dorc, t_amount
+               FROM TLines_Temp;
+
+      CALL App_TAction_Cleanup_TLines_Temp();
    END IF;
 END $$
 
