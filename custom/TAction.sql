@@ -114,37 +114,20 @@ END $$
 DROP PROCEDURE IF EXISTS App_TAction_Update_Balances_From_TLines_Temp $$
 CREATE PROCEDURE App_TAction_Update_Balances_From_TLines_Temp()
 BEGIN
-   DROP TABLE IF EXISTS pdiff;
-
-   -- Create and populate summed debits/credits table:
-   CREATE TEMPORARY TABLE pdiff
-   (
-      p_person INT UNSIGNED,
-      p_debits DECIMAL(5,2) DEFAULT 0,
-      p_credits DECIMAL(5,2) DEFAULT 0
-   );
-
-   INSERT INTO pdiff
-          (p_person, p_debits, p_credits)
-          SELECT t_person,
-                 SUM(CASE WHEN NOT(t_dorc)
-                          THEN t_amount
-                          ELSE 0
-                      END),
-                 SUM(CASE WHEN t_dorc
-                          THEN t_amount
-                          ELSE 0
-                       END)
-            FROM TLines_Temp
-           GROUP BY t_person;
-
-   -- Update with summed debits/credits table
    UPDATE Person p
-      INNER JOIN pdiff d ON p.id = d.p_person
-      SET p.balance = p.balance + d.p_debits - d.p_credits;
-
-   DROP TABLE pdiff;
-      
+          INNER JOIN (
+             SELECT t_person,
+                    SUM(CASE WHEN NOT(t_dorc)
+                             THEN t_amount
+                             ELSE 0
+                         END) AS debit,
+                    SUM(CASE WHEN t_dorc
+                             THEN t_amount
+                             ELSE 0
+                          END) AS credit
+               FROM TLines_Temp
+              GROUP BY t_person) AS s ON s.t_person = p.id
+      SET p.balance = p.balance + s.debit - s.credit;
 END $$
 
 -- ------------------------------------------------
