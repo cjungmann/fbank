@@ -95,13 +95,14 @@ BEGIN
    CALL App_Distribute_Allowances(NOW());
 END $$
 
--- ----------------------------------
--- DROP EVENT IF EXISTS grant_allowances
--- CREATE EVENT grant_allowances
---    ON SCHEDULE
---       EVERY 1 WEEK
---          STARTS CURRENT_DATE + INTERVAL 6 - WEEKDAY(CURRENT_DATE) DAY
---    DO CALL App_Grant_Allowances()  $$
+SET GLOBAL event_scheduler = ON $$
 
+-- -------------------------------------
+DROP EVENT IF EXISTS grant_allowances $$
+CREATE EVENT grant_allowances
+   ON SCHEDULE
+      EVERY 1 WEEK
+      STARTS DATE_FORMAT((CURRENT_DATE + INTERVAL 6 - WEEKDAY(CURRENT_DATE) DAY),'%Y-%m-%dT01:00')
+   DO CALL App_Grant_Allowances(); $$
 
 DELIMITER ;
