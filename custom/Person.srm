@@ -12,7 +12,12 @@ list
       type  : add
       label : Create Person
       task  : ?add
+   button
+     type   : call
+     label  : Reconcile Balances
+     task   : person_reconcile_balances
    result : 1
+      tag  : Person_List
       schema
          field : id
             readOnly : true
