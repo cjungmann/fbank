@@ -12,8 +12,8 @@
   after running make update-client to compile the import references
   in sfw_debug.xsl.
   -->
-  <!-- <xsl:import href="includes/sfw_debug.xsl" /> -->
-  <xsl:import href="includes/sfw_compiled.xsl" />
+  <xsl:import href="includes/sfw_debug.xsl" />
+  <!-- <xsl:import href="includes/sfw_compiled.xsl" /> -->
 
   <!-- custom application stylesheets: -->
   <xsl:import href="sublines.xsl" />
@@ -35,11 +35,12 @@
 
         <!-- SchemaFW includes -->
         <xsl:apply-templates select="." mode="fill_head">
-          <xsl:with-param name="jscripts">min</xsl:with-param>
+          <!-- <xsl:with-param name="jscripts">min</xsl:with-param> -->
         </xsl:apply-templates>
 
         <script type="text/javascript" src="sublines.js" />
         <script type="text/javascript" src="amount_input.js" />
+        <script type="text/javascript" src="utilities.js" />
         <style type="text/css">
           body { font-size:16pt; }
           <xsl:call-template name="sublines_css_styles" />
