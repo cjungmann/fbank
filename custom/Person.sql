@@ -115,7 +115,15 @@ BEGIN
                GROUP BY id_person) s ON s.id_person = p.id
       SET balance = s.debit - s.credit;
 
-      CALL App_Person_List();
+
+      IF ROW_COUNT() = 0 THEN
+         SELECT 1 AS error, 'No balances updated.' AS msg;
+      ELSE
+         SELECT 0 AS error;
+         -- Second query only necessary if records have changed:
+         CALL App_Person_List(NULL);
+      END IF;
+
 END $$
 
 DELIMITER ;
