@@ -17,6 +17,7 @@ list
      label  : Reconcile Balances
      task   : person_reconcile_balances
    result : 1
+      name : people
       tag  : Person_List
       schema
          field : id
@@ -104,3 +105,13 @@ edit_submit
 delete
    type      : delete
    procedure : App_Person_Delete
+
+reconcile
+   type    : task
+   procedure : App_Reconcile_Balances
+   result
+      type : outcome
+   result
+      target : people
+      type : replace
+      
