@@ -5,12 +5,12 @@ $default-mode   : list
 list
    type         : table
    procedure    : App_TAction_List
-   title        : TAction Management
+   title        : Transactions
    autoload_tag : page
    on_line_click : ?read&id={!id}
    button
       type  : add
-      label : Create TAction
+      label : Create Transaction
       task  : ?add
    result : 1
       schema
