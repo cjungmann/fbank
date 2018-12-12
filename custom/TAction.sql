@@ -163,7 +163,7 @@ BEGIN
    DECLARE newid INT UNSIGNED;
    DECLARE rcount INT UNSIGNED;
 
-   -- Create a temp table with submitted transaction lines:
+   -- Create and fill a temp table with submitted transaction lines:
    CALL App_TAction_Prepare_TLines_Temp();
    CALL App_TAction_Parse_To_TLines_Temp(tlines);
    CALL App_TAction_Add_To_TLines_Temp(person,dorc,amount);
