@@ -29,7 +29,7 @@ add
    schema-proc  : App_TAction_Add
    procedure    : App_TAction_Add_Setup
    form-action  : ?add_submit
-   title        : Add TAction
+   title        : Add Transaction
    autoload_tag : dialog
    schema
       field : date_taction
