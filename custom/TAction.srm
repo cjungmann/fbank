@@ -61,6 +61,8 @@ add
          enum : TAction:trans_type
       field : tnote
          label : Notes
+         rows  : 6
+         cols  : 25
    result : 1
       name : alines
    result : 2
