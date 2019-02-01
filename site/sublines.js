@@ -70,7 +70,7 @@
            }
 
        return false;
-    }
+    };
 
     _sublines.prototype.add_line = function()
     {
