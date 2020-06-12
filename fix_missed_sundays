@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+# Dates are saved as arrays so they can be easily converted
+# between integer and 9999-99-99 values.  Changes since this
+# decision probably make this unnecessary, but this should
+# only be needed once, so I'm not gonna change it now.
+
+declare IFS='-'
+
+if [ $# -lt 1 ]; then
+    echo
+    echo "Call program with starting date and optional ending date:"
+    echo
+    echo "./fix_missed_sundays 2019-11-20"
+    echo "./fix_missed_sundays 2019-11-20 2020-06-08"
+    echo
+    exit 1
+fi
+
+declare start_date=( $1 )
+
+# Missing second date uses current date
+declare end_date=( $2 )
+if [ -z "$end_date" ]; then
+    declare -a today=( $( date -I ) )
+    end_date=( ${today[*]} )
+fi
+
+# Save end date as an integer for easier comparison in while loop:
+declare -i endint="${end_date[*]}"
+
+# Current date will change with each loop:
+declare cdate=( ${start_date[*]} )
+
+declare -i dow
+declare -a sundays=()
+
+IFS=$''
+while [ "${cdate[*]}" -lt "${end_date[*]}" ]; do
+    IFS='-'
+    dow=$( date -d "${cdate[*]}" +%w )
+    if [ "$dow" -eq 0 ]; then
+        sundays=( "${sundays[@]}" "${cdate[*]}" )
+    fi
+
+    cdate=( $( date -I -d "${cdate[*]} + 1 day" ) )
+    IFS=$''
+done
+
+for cdate in "${sundays[@]}"; do
+    mysql FBank -e "CALL App_Distribute_Allowances('${cdate}')"
+done
